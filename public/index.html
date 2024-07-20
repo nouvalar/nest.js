@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Manager</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .container { width: 50%; margin: 0 auto; }
+    .task-list { margin-top: 20px; }
+    .task { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Task Manager</h1>
+    <form id="task-form">
+      <input type="text" id="title" placeholder="Task Title" required />
+      <input type="text" id="description" placeholder="Task Description" required />
+      <button type="submit">Add Task</button>
+    </form>
+    <div id="task-list" class="task-list"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const taskForm = document.getElementById('task-form');
+      const taskList = document.getElementById('task-list');
+
+      // Function to fetch and display tasks
+      async function fetchTasks() {
+        const response = await fetch('http://localhost:3000/tasks');
+        const tasks = await response.json();
+        taskList.innerHTML = '';
+        tasks.forEach(task => {
+          const taskElement = document.createElement('div');
+          taskElement.classList.add('task');
+          taskElement.innerHTML = `<strong>${task.title}</strong><p>${task.description}</p>`;
+          taskList.appendChild(taskElement);
+        });
+      }
+
+      // Handle form submission
+      taskForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const title = document.getElementById('title').value;
+        const description = document.getElementById('description').value;
+
+        const response = await fetch('http://localhost:3000/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, description })
+        });
+
+        const newTask = await response.json();
+        document.getElementById('title').value = '';
+        document.getElementById('description').value = '';
+        fetchTasks();  // Refresh task list
+      });
+
+      fetchTasks();  // Initial fetch
+    });
+  </script>
+</body>
+</html>
